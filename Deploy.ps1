@@ -1,0 +1,1 @@
+New-AzResourceGroupDeployment -Name AKSDeployment -ResourceGroupName varun-rg -TemplateFile .\main.bicep -TemplateParameterFile .\parameters.json -verbose
