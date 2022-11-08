@@ -50,6 +50,12 @@ resource akscluster 'Microsoft.ContainerService/managedClusters@2022-09-01' = {
           logAnalyticsWorkspaceResourceId: LogAnalyticsWorkSpaceId
         }
       }
+      azurepolicy: {
+        enabled: true
+        config: {
+          version: 'v2'
+        }
+      }
     }
   }
 }
