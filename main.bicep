@@ -23,7 +23,6 @@ param AzureFirewallCidr string
 
 
 // Create AKS Cluster
-
 module aks 'aks/aks.bicep' ={
   name: 'AKS-Deploy'
   params: {
@@ -37,6 +36,7 @@ module aks 'aks/aks.bicep' ={
     loganalyticsworkspace
   ]
 }
+
 // Module to create Log Al=nalytics Workspace 
 module loganalyticsworkspace 'loganalytics/loganalyticsworkspace.bicep' ={
   name: 'log-analytics-Deploymet'
@@ -45,8 +45,6 @@ module loganalyticsworkspace 'loganalytics/loganalyticsworkspace.bicep' ={
     logAnalyticsWorkspaceName: '${environment}-${portfolio}-AKS-LogAnalytics'
   }
 }
-
-output logname string = loganalyticsworkspace.outputs.LogAnalyticsWorkSpaceId
 
 // Module to create Keyvault
 module keyvault 'keyvault/keyvault.bicep' = {
@@ -60,7 +58,6 @@ module keyvault 'keyvault/keyvault.bicep' = {
 }
 
 // module to create encryption key in Keyvault
-
 module encryptionkey 'keyvault/keys.bicep' = {
   name: 'encryption-key-deploy'
   params: {
@@ -85,7 +82,6 @@ module diskencryptionset 'diskencyrptionset/diskencryptionset.bicep' = {
 }
 
 // Create Access Policy for KeyVault
-
 var permissions = {
   keys: [
     'get'
@@ -98,6 +94,7 @@ var permissions = {
   ]
 }
 
+// Module to add access on disk encryption set
 module accesspolicy 'keyvault/access-policy.bicep' = {
   name: 'access-policy-deploy'
   params: {
