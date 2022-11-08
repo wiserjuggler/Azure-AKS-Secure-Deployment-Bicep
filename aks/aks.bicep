@@ -17,7 +17,7 @@ param agentPoolProfiles array = [
   }
 ]
 
-resource akscluster 'Microsoft.ContainerService/managedClusters@2022-09-02-preview' = {
+resource akscluster 'Microsoft.ContainerService/managedClusters@2022-09-01' = {
   name: AksClusterName
   location: location
   identity: {
@@ -43,5 +43,14 @@ resource akscluster 'Microsoft.ContainerService/managedClusters@2022-09-02-previ
     networkProfile: {
       networkPlugin: 'azure'
     }
+    addonProfiles: {
+      omsagent: {
+        enabled: true
+        config: {
+          logAnalyticsWorkspaceResourceId: LogAnalyticsWorkSpaceId
+        }
+      }
+    }
   }
 }
+

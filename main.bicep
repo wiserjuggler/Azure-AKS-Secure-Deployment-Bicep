@@ -33,6 +33,9 @@ module aks 'aks/aks.bicep' ={
     dnsPrefix: '${environment}-${portfolio}-AKS'
     LogAnalyticsWorkSpaceId: loganalyticsworkspace.outputs.LogAnalyticsWorkSpaceId
   }
+  dependsOn: [
+    loganalyticsworkspace
+  ]
 }
 // Module to create Log Al=nalytics Workspace 
 module loganalyticsworkspace 'loganalytics/loganalyticsworkspace.bicep' ={
@@ -42,6 +45,8 @@ module loganalyticsworkspace 'loganalytics/loganalyticsworkspace.bicep' ={
     logAnalyticsWorkspaceName: '${environment}-${portfolio}-AKS-LogAnalytics'
   }
 }
+
+output logname string = loganalyticsworkspace.outputs.LogAnalyticsWorkSpaceId
 
 // Module to create Keyvault
 module keyvault 'keyvault/keyvault.bicep' = {
