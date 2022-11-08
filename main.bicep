@@ -31,6 +31,15 @@ module aks 'aks/aks.bicep' ={
     AksClusterName: '${environment}-${portfolio}-AKS-Cluster'
     diskEncryptionSetID: diskencryptionset.outputs.desId
     dnsPrefix: '${environment}-${portfolio}-AKS'
+    LogAnalyticsWorkSpaceId: loganalyticsworkspace.outputs.LogAnalyticsWorkSpaceId
+  }
+}
+// Module to create Log Al=nalytics Workspace 
+module loganalyticsworkspace 'loganalytics/loganalyticsworkspace.bicep' ={
+  name: 'log-analytics-Deploymet'
+  params: {
+    location: location
+    logAnalyticsWorkspaceName: '${environment}-${portfolio}-AKS-LogAnalytics'
   }
 }
 

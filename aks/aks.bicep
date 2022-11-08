@@ -3,7 +3,7 @@ param location string = resourceGroup().location
 param kubernetesVersion string = '1.23.12'
 param diskEncryptionSetID string
 param dnsPrefix string
-param LogAnalyticsName string = 'NonProd-LogAnalytics'
+param LogAnalyticsWorkSpaceId string
 param agentPoolProfiles array = [
   {
     name: 'agentpool'
@@ -34,7 +34,7 @@ resource akscluster 'Microsoft.ContainerService/managedClusters@2022-09-02-previ
     }
     securityProfile: {
       defender: {
-        logAnalyticsWorkspaceResourceId: resourceId('Microsoft.OperationalInsights/workspaces', LogAnalyticsName)
+        logAnalyticsWorkspaceResourceId: LogAnalyticsWorkSpaceId
         securityMonitoring: {
           enabled: true
         }
