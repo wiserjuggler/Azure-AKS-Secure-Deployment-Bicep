@@ -31,7 +31,7 @@ module aks 'aks/aks.bicep' ={
     diskEncryptionSetID: diskencryptionset.outputs.desId
     dnsPrefix: '${environment}-${portfolio}-AKS'
     LogAnalyticsWorkSpaceId: loganalyticsworkspace.outputs.LogAnalyticsWorkSpaceId
-    vnetName: '${environment}-${portfolio}-Vnet'
+    vnetName: '${environment}-${portfolio}-AKS-Vnet'
     privateEndpointSubnetName: '${environment}-${portfolio}-AKS-Cluster-Subnet'
   }
   dependsOn: [
@@ -39,7 +39,7 @@ module aks 'aks/aks.bicep' ={
   ]
 }
 
-// Module to create Log Al=nalytics Workspace 
+// Module to create Log Analytics Workspace 
 module loganalyticsworkspace 'loganalytics/loganalyticsworkspace.bicep' ={
   name: 'log-analytics-Deploymet'
   params: {
@@ -54,9 +54,12 @@ module keyvault 'keyvault/keyvault.bicep' = {
   params: {
     location: location
     keyVaultName: '${environment}-${portfolio}-AKS-keyVault'
-    vnetName: '${environment}-${portfolio}-Vnet'
+    vnetName: '${environment}-${portfolio}-AKS-Vnet'
     privateEndpointSubnetName: '${environment}-${portfolio}-AKS-Cluster-Subnet'
   }
+  dependsOn: [
+    vnet
+  ]
 }
 
 // module to create encryption key in Keyvault
