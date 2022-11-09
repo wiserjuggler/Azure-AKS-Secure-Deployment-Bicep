@@ -45,7 +45,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
       {
         name: AKSClusterSubnetName
         properties: {
-          addressPrefix: '${vnetCidrPrefix}.0.0/24'
+          addressPrefix: '${vnetCidrPrefix}.0.0/22'
           privateEndpointNetworkPolicies: 'Disabled'
           networkSecurityGroup: {
             id: AKSClusternsg
