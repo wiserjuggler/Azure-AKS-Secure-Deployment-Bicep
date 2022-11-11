@@ -4,14 +4,8 @@ param kubernetesVersion string = '1.23.12'
 param diskEncryptionSetID string
 param dnsPrefix string
 param LogAnalyticsWorkSpaceId string
-param privateEndpointName string = '${AksClusterName}-privateEndpoint'
-
-@description('The name of the virtual network to create.')
-param vnetName string 
-
-@description('The name of the private endpoint subnet')
-param privateEndpointSubnetName string 
-
+param vnetSubnetID string
+param nodeResourceGroup string
 param agentPoolProfiles array = [
   {
     name: 'agentpool'
@@ -21,7 +15,15 @@ param agentPoolProfiles array = [
     vmSize: 'Standard_DS2_v2'
     osType: 'Linux'
     mode: 'System'
+    availabilityZones: [
+      '1'
+      '2'
+      '3'
+    ]
+    type: 'VirtualMachineScaleSets'
+    storageProfile: 'ManagedDisks'
     enableAutoScaling: true
+    vnetSubnetID: vnetSubnetID
   }
 ]
 
@@ -32,6 +34,7 @@ resource akscluster 'Microsoft.ContainerService/managedClusters@2022-09-01' = {
     type: 'SystemAssigned'
   }
   properties: {
+    nodeResourceGroup: nodeResourceGroup
     kubernetesVersion: kubernetesVersion
     diskEncryptionSetID: diskEncryptionSetID
     enableRBAC: true
@@ -64,31 +67,15 @@ resource akscluster 'Microsoft.ContainerService/managedClusters@2022-09-01' = {
           version: 'v2'
         }
       }
-    }
-  }
-}
-
-resource privateEndpoint 'Microsoft.Network/privateEndpoints@2022-05-01' = {
-  name: privateEndpointName
-  location: location
-  properties: {
-    customNetworkInterfaceName: '${privateEndpointName}-nic'
-    subnet: {
-      id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, privateEndpointSubnetName)
-    }
-    privateLinkServiceConnections: [
-      {
-        name: privateEndpointName
-        properties: {
-          privateLinkServiceId: akscluster.id
-          privateLinkServiceConnectionState: {
-            status: 'Approved'
-            description: 'Auto-Approved'
-            actionsRequired: 'None'
-          }
+      azureKeyvaultSecretsProvider: {
+        enabled: true
+        config: {
+          enableSecretRotation: 'false'
+          rotationPollInterval: '2m'
         }
       }
-    ]
+    }
   }
 }
 
+output aksclusterid string = akscluster.id

@@ -12,7 +12,6 @@ param vnetName string
 @description('The name of the private endpoint subnet')
 param privateEndpointSubnetName string 
 
-var privateEndpointName = '${keyVaultName}-pvtEndpoint'
 
 resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
   name: keyVaultName
@@ -49,29 +48,3 @@ resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
 output KeyVaultId string = keyVault.id
 output keyVaultName string = keyVault.name
         
-resource privateEndpoint 'Microsoft.Network/privateEndpoints@2022-05-01' = {
-  name: privateEndpointName
-  location: location
-  properties: {
-    customNetworkInterfaceName: '${privateEndpointName}-nic'
-    subnet: {
-      id: resourceId('Microsoft.Network/virtualNetworks/subnets', vnetName, privateEndpointSubnetName)
-    }
-    privateLinkServiceConnections: [
-      {
-        name: privateEndpointName
-        properties: {
-          privateLinkServiceId: keyVault.id
-          privateLinkServiceConnectionState: {
-            status: 'Approved'
-            description: 'Auto-Approved'
-            actionsRequired: 'None'
-          }
-          groupIds: [
-            'vault'
-          ]
-        }
-      }
-    ]
-  }
-}

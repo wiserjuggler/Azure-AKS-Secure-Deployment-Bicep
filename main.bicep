@@ -22,6 +22,121 @@ param vnetCidrPrefix string  //specify in the param file
 param AzureFirewallCidr string
 
 
+// Role Assignment 
+
+// module roleassignment 'roleassignment/roleassignment.bicep' = {
+//   name: 'AKSSubnetRoleAssignment'
+//   params: {
+//     AksPrincipalId: aks.outputs.aksclusterid 
+//     SubnetID: vnet.outputs.privateEndpointSubnetId
+//   }
+//   dependsOn: [
+//     aks
+//     vnet
+//   ]
+// }
+
+
+// Create Disk Access
+
+module diskaccess 'diskaccess/diskaccess.bicep' = {
+  name: 'DiskAccess-Deployment'
+  params: {
+    location: location
+    DiskAccessName: '${environment}-${portfolio}aks-DiskAccess'
+  }
+}
+
+// ACR Registry creation
+
+module acr './acr/acr.bicep' = {
+  name: 'acr-deployment'
+  params: {
+    location: location
+    acrname: '${environment}${portfolio}aksacr'
+  }
+}
+
+// Create Private DNS ZONE
+module dnszoneacr './privateEnpoint/private-dns-zone.bicep' = {
+  name: 'dnz-zone-Deployment-1'
+  params: {
+    privateDnsZoneName: 'privatelink.azurecr.io'
+    virtualNetworkName: vnet.outputs.vnetname
+    vnetId: vnet.outputs.vnetId
+  }
+}
+
+module dnszonedisk './privateEnpoint/private-dns-zone.bicep' = {
+  name: 'dnz-zone-Deployment-2'
+  params: {
+    privateDnsZoneName: 'privatelink.blob.core.windows.net'
+    virtualNetworkName: vnet.outputs.vnetname
+    vnetId: vnet.outputs.vnetId
+  }
+}
+
+module dnszonekeyvault './privateEnpoint/private-dns-zone.bicep' = {
+  name: 'dnz-zone-Deployment-3'
+  params: {
+    privateDnsZoneName: 'privatelink.vaultcore.azure.net'
+    virtualNetworkName: vnet.outputs.vnetname
+    vnetId: vnet.outputs.vnetId
+  }
+}
+
+
+// Create Private Endpoint for the AKS Cluster
+
+
+module acrprivateEndpoint './privateEnpoint/privateEndpoint.bicep' = {
+  name: 'ACR-AKS-private-endpoint'
+  params: {
+    location: location
+    privateEndpointName: '${environment}-${portfolio}-ACR-AKS-PrivateEndpoint'
+    groupIds: [
+      'registry'
+    ]
+    linkedServiceId: acr.outputs.acr
+    privateEndpointSubnetId: vnet.outputs.privateEndpointSubnetId
+    privateDnsZoneName: dnszoneacr.outputs.privateDnsZoneName
+    DnsZoneConfigName: '${dnszoneacr.outputs.privateDnsZoneName}-config'
+    DnsZoneId: dnszoneacr.outputs.privateDnsZoneId
+  }
+}
+
+module diskprivateEndpoint './privateEnpoint/privateEndpoint.bicep' = {
+  name: 'diskAccess-AKS-private-endpoint'
+  params: {
+    location: location
+    privateEndpointName: '${environment}-${portfolio}-DiskAccess-AKS-PrivateEndpoint'
+    groupIds: [
+      'disks'
+    ]
+    linkedServiceId: diskaccess.outputs.DiskAccessId
+    privateEndpointSubnetId: vnet.outputs.privateEndpointSubnetId
+    privateDnsZoneName: dnszonedisk.outputs.privateDnsZoneName
+    DnsZoneConfigName: '${dnszonedisk.outputs.privateDnsZoneName}-config'
+    DnsZoneId: dnszonedisk.outputs.privateDnsZoneId
+  }
+}
+
+module keyVaultprivateEndpoint './privateEnpoint/privateEndpoint.bicep' = {
+  name: 'Keyvault-AKS-private-endpoint'
+  params: {
+    location: location
+    privateEndpointName: '${environment}-${portfolio}-KeyVault-AKS-PrivateEndpoint'
+    groupIds: [
+      'vault'
+    ]
+    linkedServiceId: keyvault.outputs.KeyVaultId
+    privateEndpointSubnetId: vnet.outputs.privateEndpointSubnetId
+    privateDnsZoneName: dnszonekeyvault.outputs.privateDnsZoneName
+    DnsZoneConfigName: '${dnszonekeyvault.outputs.privateDnsZoneName}-config'
+    DnsZoneId: dnszonekeyvault.outputs.privateDnsZoneId
+  }
+}
+
 // Create AKS Cluster
 module aks 'aks/aks.bicep' ={
   name: 'AKS-Deploy'
@@ -31,8 +146,8 @@ module aks 'aks/aks.bicep' ={
     diskEncryptionSetID: diskencryptionset.outputs.desId
     dnsPrefix: '${environment}-${portfolio}-AKS'
     LogAnalyticsWorkSpaceId: loganalyticsworkspace.outputs.LogAnalyticsWorkSpaceId
-    vnetName: '${environment}-${portfolio}-AKS-Vnet'
-    privateEndpointSubnetName: '${environment}-${portfolio}-AKS-Cluster-Subnet'
+    vnetSubnetID: vnet.outputs.privateEndpointSubnetId
+    nodeResourceGroup: '${environment}-${portfolio}-AKS-Management-RG'
   }
   dependsOn: [
     loganalyticsworkspace

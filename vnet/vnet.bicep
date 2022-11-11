@@ -113,3 +113,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
     ]
   }
 }
+
+output privateEndpointSubnetId string = vnet.properties.subnets[0].id
+output vnetname string = vnet.name
+output vnetId string = vnet.id
