@@ -21,22 +21,23 @@ param vnetCidrPrefix string  //specify in the param file
 @description('CIDR Block for Firewall Subnet')
 param AzureFirewallCidr string
 
+// managed identity   
 
-// Role Assignment 
+module aksmanagedidentity 'managedidentity/managedidentity.bicep' = {
+  name: 'AKS-Managed-Identity-Deployment'
+  params: {
+    location: location
+    ManagedIdentityName: '${environment}-${portfolio}-AKS-ManagedIdentity'
+  }
+}
 
-// module roleassignment 'roleassignment/roleassignment.bicep' = {
-//   name: 'AKSSubnetRoleAssignment'
-//   params: {
-//     AksPrincipalId: aks.outputs.aksclusterid 
-//     SubnetID: vnet.outputs.privateEndpointSubnetId
-//   }
-//   dependsOn: [
-//     aks
-//     vnet
-//   ]
-// }
-
-
+module acrmanagedidentity 'managedidentity/managedidentity.bicep' = {
+  name: 'ACR-Managed-Identity-Deployment'
+  params: {
+    location: location
+    ManagedIdentityName: '${environment}-${portfolio}-ACR-ManagedIdentity'
+  }
+}
 // Create Disk Access
 
 module diskaccess 'diskaccess/diskaccess.bicep' = {
@@ -54,6 +55,9 @@ module acr './acr/acr.bicep' = {
   params: {
     location: location
     acrname: '${environment}${portfolio}aksacr'
+    identity: acrmanagedidentity.outputs.ManagedIdentityClientID
+    KeyIdentifier: ACRencryptionkey.outputs.KeyUrl
+    userAssignedIdentitiesName: acrmanagedidentity.outputs.ManagedIdentityName
   }
 }
 
@@ -148,9 +152,11 @@ module aks 'aks/aks.bicep' ={
     LogAnalyticsWorkSpaceId: loganalyticsworkspace.outputs.LogAnalyticsWorkSpaceId
     vnetSubnetID: vnet.outputs.privateEndpointSubnetId
     nodeResourceGroup: '${environment}-${portfolio}-AKS-Management-RG'
+    userAssignedIdentitiesName: aksmanagedidentity.outputs.ManagedIdentityName
   }
   dependsOn: [
     loganalyticsworkspace
+    aksmanagedidentity
   ]
 }
 
@@ -178,10 +184,22 @@ module keyvault 'keyvault/keyvault.bicep' = {
 }
 
 // module to create encryption key in Keyvault
-module encryptionkey 'keyvault/keys.bicep' = {
-  name: 'encryption-key-deploy'
+
+module AKSencryptionkey 'keyvault/keys.bicep' = {
+  name: 'AKSencryption-key-deploy'
   params: {
     keyName: '${environment}-${portfolio}-AKS-EncryptionKey'
+    keySize: 4096
+    keyVaultName: keyvault.outputs.keyVaultName
+  }
+  dependsOn:[
+    keyvault
+  ]
+}
+module ACRencryptionkey 'keyvault/keys.bicep' = {
+  name: 'ACRencryption-key-deploy'
+  params: {
+    keyName: '${environment}-${portfolio}-ACR-EncryptionKey'
     keySize: 4096
     keyVaultName: keyvault.outputs.keyVaultName
   }
@@ -197,7 +215,7 @@ module diskencryptionset 'diskencyrptionset/diskencryptionset.bicep' = {
     location:location
     DiskEncryptionSetName: '${environment}-${portfolio}-AKS-DiskEncryptionSet'
     KeyVaultId: keyvault.outputs.KeyVaultId
-    keyUrl: encryptionkey.outputs.KeyUrl
+    keyUrl: AKSencryptionkey.outputs.KeyUrl
   }
 }
 
@@ -215,12 +233,21 @@ var permissions = {
 }
 
 // Module to add access on disk encryption set
-module accesspolicy 'keyvault/access-policy.bicep' = {
-  name: 'access-policy-deploy'
+module AKSaccesspolicy 'keyvault/access-policy.bicep' = {
+  name: 'AKSaccess-policy-deploy'
   params: {
     keyVaultName: keyvault.outputs.keyVaultName
     permissions: permissions
     principalId: diskencryptionset.outputs.principalId
+  }
+}
+
+module ACRaccesspolicy 'keyvault/access-policy.bicep' = {
+  name: 'ACRaccess-policy-deploy'
+  params: {
+    keyVaultName: keyvault.outputs.keyVaultName
+    permissions: permissions
+    principalId: acrmanagedidentity.outputs.ManagedIdentityPrincipalID
   }
 }
 
@@ -268,8 +295,8 @@ module vnet './vnet/vnet.bicep' ={
     AzureBastionnsg: nsg.outputs.azurebastionnsgid
     vnetName: '${environment}-${portfolio}-AKS-Vnet' 
     vnetCidrPrefix: vnetCidrPrefix
-    AKSClusterroutetableid: Aksclusterroutetable.outputs.routetableid
-    AKSManagementroutetableid: AksManagementroutetable.outputs.routetableid
+    // AKSClusterroutetableid: Aksclusterroutetable.outputs.routetableid
+    // AKSManagementroutetableid: AksManagementroutetable.outputs.routetableid
   }
   dependsOn: [
     nsg

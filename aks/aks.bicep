@@ -6,6 +6,8 @@ param dnsPrefix string
 param LogAnalyticsWorkSpaceId string
 param vnetSubnetID string
 param nodeResourceGroup string
+param userAssignedIdentitiesName string
+var userAssignedIdentitiesId = concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', userAssignedIdentitiesName)
 param agentPoolProfiles array = [
   {
     name: 'agentpool'
@@ -31,7 +33,15 @@ resource akscluster 'Microsoft.ContainerService/managedClusters@2022-09-01' = {
   name: AksClusterName
   location: location
   identity: {
-    type: 'SystemAssigned'
+
+    type: 'UserAssigned'
+
+    userAssignedIdentities: {
+
+      '${userAssignedIdentitiesId}': {}
+
+    }
+
   }
   properties: {
     nodeResourceGroup: nodeResourceGroup
@@ -79,3 +89,4 @@ resource akscluster 'Microsoft.ContainerService/managedClusters@2022-09-01' = {
 }
 
 output aksclusterid string = akscluster.id
+output aksclustername string = akscluster.name

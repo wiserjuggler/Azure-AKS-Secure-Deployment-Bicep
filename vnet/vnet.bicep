@@ -25,11 +25,11 @@ param AKSManagementnsg string
 @description('The name of the Azure Bastion NSG.')
 param AzureBastionnsg string 
 
-@description('ID of the AKS Clutser Route Table')
-param AKSClusterroutetableid string
+// @description('ID of the AKS Clutser Route Table')
+// param AKSClusterroutetableid string
 
-@description('ID of the AKS Management Route Table')
-param AKSManagementroutetableid string
+// @description('ID of the AKS Management Route Table')
+// param AKSManagementroutetableid string
 
 
 resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
@@ -76,9 +76,9 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
           networkSecurityGroup: {
             id: AKSClusternsg
           }
-          routeTable: {
-            id: AKSClusterroutetableid
-          }
+          // routeTable: {
+          //   id: AKSClusterroutetableid   (Require a Firewall with outbound internet connectivity)
+          // }
         }
       }
       {
@@ -88,9 +88,9 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
           networkSecurityGroup: {
             id: AKSManagementnsg
           }
-          routeTable: {
-            id: AKSManagementroutetableid
-          }
+          // routeTable: {
+          //   id: AKSManagementroutetableid
+          // }
           serviceEndpoints: [
             {
               service: 'Microsoft.ContainerRegistry'

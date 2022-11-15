@@ -31,17 +31,17 @@ resource aksclusternsg 'Microsoft.Network/networkSecurityGroups@2021-03-01' = {
         }
       }
       {
-        name: 'Inbound-DenyAll'
+        name: 'AllowInternetAccess'
         properties: {
-          description: 'Deny All Inbound'
+          description: 'Allow All Outbound'
           protocol: '*'
           sourcePortRange: '*'
           destinationPortRange: '*'
-          sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: '*'
-          access: 'Deny'
-          priority: 4096
-          direction: 'Inbound'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: 'Internet'
+          access: 'Allow'
+          priority: 100
+          direction: 'outbound'
         }
       }
     ]
@@ -54,17 +54,17 @@ resource aksmanagementnsg 'Microsoft.Network/networkSecurityGroups@2021-03-01' =
   properties: {
     securityRules: [
       {
-        name: 'Inbound-DenyAll'
+        name: 'AllowInternetAccess'
         properties: {
-          description: 'Deny All Inbound'
+          description: 'Allow All Outbound'
           protocol: '*'
           sourcePortRange: '*'
           destinationPortRange: '*'
-          sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: '*'
-          access: 'Deny'
-          priority: 4096
-          direction: 'Inbound'
+          sourceAddressPrefix: '*'
+          destinationAddressPrefix: 'Internet'
+          access: 'Allow'
+          priority: 100
+          direction: 'outbound'
         }
       }
     ]
@@ -135,20 +135,6 @@ resource azurebastionnsg 'Microsoft.Network/networkSecurityGroups@2021-03-01' = 
           destinationAddressPrefix: 'VirtualNetwork'
           access: 'Allow'
           priority: 130
-          direction: 'Inbound'
-        }
-      }
-      {
-        name: 'Inbound-DenyAll'
-        properties: {
-          description: 'Deny All Inbound'
-          protocol: '*'
-          sourcePortRange: '*'
-          destinationPortRange: '*'
-          sourceAddressPrefix: 'VirtualNetwork'
-          destinationAddressPrefix: '*'
-          access: 'Deny'
-          priority: 4096
           direction: 'Inbound'
         }
       }
