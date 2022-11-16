@@ -1,19 +1,22 @@
-param managedIdentityName string
-param VnetName string
-param roleDefinitionId string
+param AksClusterName string
+param acrname string
 
-// resource virtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' existing = {
-//   name: VnetName
-// }
+var acrPullRoleDefinitionId = subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')
 
+resource aks 'Microsoft.ContainerService/managedClusters@2022-09-01' existing = {
+  name: AksClusterName
+}
 
+resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' existing = {
+  name: acrname
+} 
 
-resource akssubnetroleassigment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(VnetName)
-  // scope: virtualNetwork
+resource acrpullrole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(resourceGroup().id, aks.id, acrPullRoleDefinitionId)
+   scope: acr
   properties: {
-    roleDefinitionId: roleDefinitionId
-    principalId: guid(managedIdentityName)
+    roleDefinitionId: acrPullRoleDefinitionId
+    principalId: aks.properties.identityProfile.kubeletidentity.objectId
     principalType: 'ServicePrincipal'
   }
 }

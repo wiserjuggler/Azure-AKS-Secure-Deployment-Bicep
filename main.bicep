@@ -21,7 +21,16 @@ param vnetCidrPrefix string  //specify in the param file
 @description('CIDR Block for Firewall Subnet')
 param AzureFirewallCidr string
 
-// managed identity   
+//role assignment
+ module acrpullrole 'roleassignment/roleassignment.bicep' = {
+  name: 'acrpullrole'
+  params: {
+    acrname: acr.outputs.acrname
+    AksClusterName: aks.outputs.aksclustername
+  }
+ }
+
+// managed identity 
 
 module aksmanagedidentity 'managedidentity/managedidentity.bicep' = {
   name: 'AKS-Managed-Identity-Deployment'
@@ -289,7 +298,6 @@ module vnet './vnet/vnet.bicep' ={
     location: location
     AKSClusterSubnetName: '${environment}-${portfolio}-AKS-Cluster-Subnet'
     AKSManagementSubnetName: '${environment}-${portfolio}-AKS-Management-Subnet'
-    AzureBastionSubnetName: '${environment}-${portfolio}-AzureBastion-Subnet'
     AKSClusternsg: nsg.outputs.aksclusternsgid
     AKSManagementnsg: nsg.outputs.aksmanagementnsgid
     AzureBastionnsg: nsg.outputs.azurebastionnsgid

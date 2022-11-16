@@ -1,0 +1,11 @@
+You can pull that image from Microsoft’s container registry by running the following:
+
+docker pull mcr.microsoft.com/azuredocs/azure-vote-front:v1
+Before we push this image to our Azure Container Registry, we need to tag the image:
+
+docker tag mcr.microsoft.com/azuredocs/azure-vote-front:v1 devthoraksacr.azurecr.io/azure-vote-front:v1
+Once tagged, we can push it to ACR:
+
+docker push <acr-login-server>/azure-vote-front:v1
+
+az aks Get-Credentials -g Dev-Thor-AKS-RG -n Dev-THOR-AKS-Cluster

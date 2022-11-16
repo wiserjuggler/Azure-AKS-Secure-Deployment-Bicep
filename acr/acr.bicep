@@ -48,3 +48,4 @@ resource acr 'Microsoft.ContainerRegistry/registries@2021-09-01' = {
 }
 
 output acr string = acr.id
+output acrname string = acr.name

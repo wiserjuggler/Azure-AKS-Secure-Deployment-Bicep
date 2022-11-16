@@ -10,9 +10,6 @@ param AKSClusterSubnetName string
 @description('The name of the AKS Management Subnet.')
 param AKSManagementSubnetName string 
 
-@description('The name of the Azure Bastion Subnet.')
-param AzureBastionSubnetName string 
-
 @description('The name of the virtual network to create.')
 param vnetName string 
 
@@ -102,7 +99,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
         }
       }
       {
-        name: AzureBastionSubnetName
+        name: 'AzureBastionSubnet'
         properties: {
           addressPrefix: '${vnetCidrPrefix}.4.64/26'
           networkSecurityGroup: {
