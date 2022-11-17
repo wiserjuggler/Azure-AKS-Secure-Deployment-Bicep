@@ -20,7 +20,7 @@ param AKSClusternsg string
 param AKSManagementnsg string 
 
 @description('The name of the Azure Bastion NSG.')
-param AzureBastionnsg string 
+// param AzureBastionnsg string 
 
 // @description('ID of the AKS Clutser Route Table')
 // param AKSClusterroutetableid string
@@ -102,9 +102,9 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
         name: 'AzureBastionSubnet'
         properties: {
           addressPrefix: '${vnetCidrPrefix}.4.64/26'
-          networkSecurityGroup: {
-            id: AzureBastionnsg
-          }
+          // networkSecurityGroup: {
+          //   id: AzureBastionnsg
+          // }
         }
       }
     ]
@@ -114,3 +114,4 @@ resource vnet 'Microsoft.Network/virtualNetworks@2021-08-01' = {
 output privateEndpointSubnetId string = vnet.properties.subnets[0].id
 output vnetname string = vnet.name
 output vnetId string = vnet.id
+output BastionSubnetId string = vnet.properties.subnets[2].id

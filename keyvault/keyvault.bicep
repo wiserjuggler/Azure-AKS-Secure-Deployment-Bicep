@@ -12,13 +12,15 @@ param vnetName string
 @description('The name of the private endpoint subnet')
 param privateEndpointSubnetName string 
 
+// var randomstring = take(uniqueString(resourceGroup().id),4)
 
 resource keyVault 'Microsoft.KeyVault/vaults@2019-09-01' = {
-  name: keyVaultName
+  name: '${keyVaultName}qktw'
   location: location
   properties: {
     enableSoftDelete: true
     enabledForDeployment: false
+    enablePurgeProtection: true
     enabledForTemplateDeployment: true
     enabledForDiskEncryption: true
     softDeleteRetentionInDays:90

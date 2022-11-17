@@ -14,14 +14,14 @@ param agentPoolProfiles array = [
     count: 2
     minCount: 1
     maxCount: 2
-    vmSize: 'Standard_DS2_v2'
+    vmSize: 'Standard_B2s'
     osType: 'Linux'
     mode: 'System'
-    availabilityZones: [
-      '1'
-      '2'
-      '3'
-    ]
+    // availabilityZones: [
+    //   '1'
+    //   '2'
+    //   '3'
+    // ]
     type: 'VirtualMachineScaleSets'
     storageProfile: 'ManagedDisks'
     enableAutoScaling: true

@@ -21,7 +21,32 @@ param vnetCidrPrefix string  //specify in the param file
 @description('CIDR Block for Firewall Subnet')
 param AzureFirewallCidr string
 
+
+// Ubuntu JumpBox
+
+module ubuntuvm 'vm/ubuntu.bicep' = {
+  name: 'ubuntuvm-deployment'
+  params: {
+    location: location
+    computerName: '${environment}-${portfolio}-AKS-Jumpbox'
+    subnetid: vnet.outputs.privateEndpointSubnetId
+  }
+}
+
+//Bastion Deployment
+
+module bastion 'bastion/bastion.bicep' = {
+  name: 'bastion-deployment'
+  params: {
+    location: location
+    bastionHostName: '${environment}-${portfolio}-AKS-Bastion'
+    BastionpublicIpName: '${environment}-${portfolio}-AKS-Bastion-Pip'
+    BastionSubnetID: vnet.outputs.BastionSubnetId
+  }
+}
+
 //role assignment
+
  module acrpullrole 'roleassignment/roleassignment.bicep' = {
   name: 'acrpullrole'
   params: {
@@ -183,7 +208,7 @@ module keyvault 'keyvault/keyvault.bicep' = {
   name: 'keyvault-deploy'
   params: {
     location: location
-    keyVaultName: '${environment}-${portfolio}-AKS-keyVault'
+    keyVaultName: '${environment}-${portfolio}-AKS-KV'
     vnetName: '${environment}-${portfolio}-AKS-Vnet'
     privateEndpointSubnetName: '${environment}-${portfolio}-AKS-Cluster-Subnet'
   }
@@ -267,7 +292,7 @@ module nsg './nsg/nsg.bicep' = {
     location: location
     AKSClusterSubnetName: '${environment}-${portfolio}-AKS-Cluster-Subnet'
     AKSManagementSubnetName: '${environment}-${portfolio}-AKS-Management-Subnet'
-    AzureBastionSubnetName: '${environment}-${portfolio}-AzureBastion-Subnet'
+    // AzureBastionSubnetName: '${environment}-${portfolio}-AzureBastion-Subnet'
   }
 }
 
@@ -300,7 +325,7 @@ module vnet './vnet/vnet.bicep' ={
     AKSManagementSubnetName: '${environment}-${portfolio}-AKS-Management-Subnet'
     AKSClusternsg: nsg.outputs.aksclusternsgid
     AKSManagementnsg: nsg.outputs.aksmanagementnsgid
-    AzureBastionnsg: nsg.outputs.azurebastionnsgid
+    // AzureBastionnsg: nsg.outputs.azurebastionnsgid
     vnetName: '${environment}-${portfolio}-AKS-Vnet' 
     vnetCidrPrefix: vnetCidrPrefix
     // AKSClusterroutetableid: Aksclusterroutetable.outputs.routetableid
