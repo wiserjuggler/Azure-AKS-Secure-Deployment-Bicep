@@ -1,3 +1,0 @@
-containers:
-- name: azure-vote-front
-  image: devthoraksacr.azurecr.io/azure-vote-front:v1
